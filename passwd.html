@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Encrypt/Decrypt Password</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script src="js/b64.js"></script>
+        <script src="js/asmcrypto.js"></script>
+<script>
+function ab2str(ui8arr) {
+    var str = '';
+    var ix;
+    for (ix = 0; ix < ui8arr.length; ix += 1) {
+        str += String.fromCharCode(ui8arr[ix]);
+    }
+    return str;
+}
+
+function str2ab(str) {
+    var bytes = new Uint8Array(str.length);
+    for (var i = 0, strLen = str.length; i < strLen; i++) {
+        bytes[i] = str.charCodeAt(i);
+    }
+    return bytes;
+}
+
+function randomBytes(length) {
+    if (length <= 0) {
+        throw 'length=[' + length + '] must >= 0';
+    }
+    var ix;
+    var num;
+    var bytes = new Uint8Array(length);
+    for (ix = 0; ix < length; ix += 1) {
+        num = Math.floor((Math.random() * 256));
+        bytes[ix] = num;
+    }
+    return bytes;
+}
+
+function encrypt(string) {
+    /*
+     * input string plain text
+     * return Base64(skey + ivec + encrypted)
+     */
+    var skey = randomBytes(16);
+    var ivec = randomBytes(16);
+    var padding = true;
+    var data = str2ab(string);
+    var encrypted = asmCrypto.AES_CBC.encrypt(data, skey, padding, ivec);
+    var encryptedLen = encrypted.length;
+    var combo = new Uint8Array(16 + 16 + encryptedLen);
+    var ix;
+    for (ix = 0; ix < 16; ix += 1) {
+        combo[ix] = skey[ix];
+    }
+    for (ix = 0; ix < 16; ix += 1) {
+        combo[16 + ix] = ivec[ix];
+    }
+    for (ix = 0; ix < encryptedLen; ix += 1) {
+        combo[32 + ix] = encrypted[ix];
+    }
+    return base64js.fromByteArray(combo);
+}
+
+function decrypt(base64Combo) {
+    /*
+     * input Base64(skey + ivec + encrypted)
+     * output string decrypted text
+     */
+    var combo = base64js.toByteArray(base64Combo);
+    var skey = new Uint8Array(16);
+    var ivec = new Uint8Array(16);
+    var encryptedLen = combo.length - 16 - 16;
+    var encrypted = new Uint8Array(encryptedLen);
+    var padding = true;
+    var ix;
+    for (ix = 0; ix < 16; ix += 1) {
+        skey[ix] = combo[ix];
+    }
+    for (ix = 0; ix < 16; ix += 1) {
+        ivec[ix] = combo[16 + ix];
+    }
+    for (ix = 0; ix < encryptedLen; ix += 1) {
+        encrypted[ix] = combo[32 + ix];
+    }
+    var decrypted = asmCrypto.AES_CBC.decrypt(encrypted, skey, padding, ivec);
+    //return base64js.fromByteArray(decrypted);
+    return ab2str(decrypted);
+}
+
+function encryptText() {
+    var el = document.getElementById('txtText');
+    var encrypted = encrypt(el.value);
+    el.value = encrypted;
+}
+
+function decryptText() {
+    var el = document.getElementById('txtText');
+    var decrypted = decrypt(el.value);
+    el.value = decrypted;
+}
+</script>
+    </head>
+    <body>
+        <div>Using <a href="https://github.com/vibornoff/asmcrypto.js">asmCrypto</a>
+            <a href="https://github.com/beatgammit/base64-js/blob/master/lib/b64.js">base64js</a></div>
+        <h3>Only ASCII text</h3>
+        <input type="button" onclick="encryptText();" value="Encrypt"/>
+        <input type="button" onclick="decryptText();" value="Decrypt"/>
+        <br/>
+        <textarea id="txtText" name="msg" cols="80" rows="25" maxlength="8000">This is line 1.
+This is line 2.
+</textarea>
+    </body>
+</html>
