@@ -4,25 +4,9 @@
         <title>Encrypt/Decrypt Password</title>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <script src="js/b64.js"></script>
         <script src="js/asmcrypto.js"></script>
 <script>
-function ab2str(ui8arr) {
-    var str = '';
-    var ix;
-    for (ix = 0; ix < ui8arr.length; ix += 1) {
-        str += String.fromCharCode(ui8arr[ix]);
-    }
-    return str;
-}
-
-function str2ab(str) {
-    var bytes = new Uint8Array(str.length);
-    for (var i = 0, strLen = str.length; i < strLen; i++) {
-        bytes[i] = str.charCodeAt(i);
-    }
-    return bytes;
-}
+// asmCrypto.SHA512.base64(base64Combo);
 
 function randomBytes(length) {
     if (length <= 0) {
@@ -46,8 +30,11 @@ function encrypt(string) {
     var skey = randomBytes(16);
     var ivec = randomBytes(16);
     var padding = true;
-    var data = str2ab(string);
+    var data = asmCrypto.string_to_bytes(string);
     var encrypted = asmCrypto.AES_CBC.encrypt(data, skey, padding, ivec);
+    //var encrypted = asmCrypto.AES_CFB.encrypt(data, skey, ivec);
+    //var encrypted = asmCrypto.AES_OFB.encrypt(data, skey, ivec);
+    //var encrypted = asmCrypto.AES_CTR.encrypt(data, skey, ivec);
     var encryptedLen = encrypted.length;
     var combo = new Uint8Array(16 + 16 + encryptedLen);
     var ix;
@@ -60,7 +47,7 @@ function encrypt(string) {
     for (ix = 0; ix < encryptedLen; ix += 1) {
         combo[32 + ix] = encrypted[ix];
     }
-    return base64js.fromByteArray(combo);
+    return asmCrypto.bytes_to_base64(combo);
 }
 
 function decrypt(base64Combo) {
@@ -68,7 +55,7 @@ function decrypt(base64Combo) {
      * input Base64(skey + ivec + encrypted)
      * output string decrypted text
      */
-    var combo = base64js.toByteArray(base64Combo);
+    var combo = asmCrypto.base64_to_bytes(base64Combo);
     var skey = new Uint8Array(16);
     var ivec = new Uint8Array(16);
     var encryptedLen = combo.length - 16 - 16;
@@ -85,8 +72,10 @@ function decrypt(base64Combo) {
         encrypted[ix] = combo[32 + ix];
     }
     var decrypted = asmCrypto.AES_CBC.decrypt(encrypted, skey, padding, ivec);
-    //return base64js.fromByteArray(decrypted);
-    return ab2str(decrypted);
+    //var decrypted = asmCrypto.AES_CFB.decrypt(encrypted, skey, ivec);
+    //var decrypted = asmCrypto.AES_OFB.decrypt(encrypted, skey, ivec);
+    //var decrypted = asmCrypto.AES_CTR.decrypt(encrypted, skey, ivec);
+    return asmCrypto.bytes_to_string(decrypted);
 }
 
 function encryptText() {
@@ -103,14 +92,18 @@ function decryptText() {
 </script>
     </head>
     <body>
-        <div>Using <a href="https://github.com/vibornoff/asmcrypto.js">asmCrypto</a>
-            <a href="https://github.com/beatgammit/base64-js/blob/master/lib/b64.js">base64js</a></div>
-        <h3>Only ASCII text</h3>
+        <div>Using <a href="https://github.com/vibornoff/asmcrypto.js">asmCrypto</a></div>
+        <h3>Only ASCII text, no wide character, no chinese.</h3>
         <input type="button" onclick="encryptText();" value="Encrypt"/>
         <input type="button" onclick="decryptText();" value="Decrypt"/>
         <br/>
-        <textarea id="txtText" name="msg" cols="80" rows="25" maxlength="8000">This is line 1.
-This is line 2.
+        <textarea id="txtText" name="msg" cols="80" rows="25" maxlength="8000">supercalifragilisticexpialidocious
+dociousaliexpilisticfragicalisuper
+Lopado-temacho-selacho-galeo-kranio-leipsano-drim-hypo-trimmato-silphio-parao-melito-katakechy-meno-kichl-epi-kossypho-phatto-perister-alektryon-opte-kephallio-kigklo-peleio-lagoio-siraio-baphe-tragano-pterygon
+Pneumonoultramicroscopicsilicovolcanoconiosis
+Pseudopseudohypoparathyroidism
+Floccinaucinihilipilification
+Antidisestablishmentarianism
 </textarea>
     </body>
 </html>
