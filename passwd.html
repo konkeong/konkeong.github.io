@@ -22,7 +22,35 @@ function randomBytes(length) {
     return bytes;
 }
 
-function encrypt(string) {
+function aesEncrypt(cipher, data, skey, padding, ivec) {
+    if (cipher == 'aes-cbc') {
+        return asmCrypto.AES_CBC.encrypt(data, skey, padding, ivec);
+    } else if (cipher == 'aes-cfb') {
+        return asmCrypto.AES_CFB.encrypt(data, skey, ivec);
+    } else if (cipher == 'aes-ofb') {
+        return asmCrypto.AES_OFB.encrypt(data, skey, ivec);
+    } else if (cipher == 'aes-ctr') {
+        return asmCrypto.AES_CTR.encrypt(data, skey, ivec);
+    } else {
+        return asmCrypto.AES_ECB.encrypt(data, skey, padding);
+    }
+}
+
+function aesDecrypt(cipher, encrypted, skey, padding, ivec) {
+    if (cipher == 'aes-cbc') {
+        return asmCrypto.AES_CBC.decrypt(encrypted, skey, padding, ivec);
+    } else if (cipher == 'aes-cfb') {
+        return asmCrypto.AES_CFB.decrypt(encrypted, skey, ivec);
+    } else if (cipher == 'aes-ofb') {
+        return asmCrypto.AES_OFB.decrypt(encrypted, skey, ivec);
+    } else if (cipher == 'aes-ctr') {
+        return asmCrypto.AES_CTR.decrypt(encrypted, skey, ivec);
+    } else {
+        return asmCrypto.AES_ECB.decrypt(encrypted, skey, padding);
+    }
+}
+
+function encrypt(cipher, string) {
     /*
      * input string plain text
      * return Base64(skey + ivec + encrypted)
@@ -31,10 +59,7 @@ function encrypt(string) {
     var ivec = randomBytes(16);
     var padding = true;
     var data = asmCrypto.string_to_bytes(string);
-    var encrypted = asmCrypto.AES_CBC.encrypt(data, skey, padding, ivec);
-    //var encrypted = asmCrypto.AES_CFB.encrypt(data, skey, ivec);
-    //var encrypted = asmCrypto.AES_OFB.encrypt(data, skey, ivec);
-    //var encrypted = asmCrypto.AES_CTR.encrypt(data, skey, ivec);
+    var encrypted = aesEncrypt(cipher, data, skey, padding, ivec);
     var encryptedLen = encrypted.length;
     var combo = new Uint8Array(16 + 16 + encryptedLen);
     var ix;
@@ -50,7 +75,7 @@ function encrypt(string) {
     return asmCrypto.bytes_to_base64(combo);
 }
 
-function decrypt(base64Combo) {
+function decrypt(cipher, base64Combo) {
     /*
      * input Base64(skey + ivec + encrypted)
      * output string decrypted text
@@ -71,33 +96,52 @@ function decrypt(base64Combo) {
     for (ix = 0; ix < encryptedLen; ix += 1) {
         encrypted[ix] = combo[32 + ix];
     }
-    var decrypted = asmCrypto.AES_CBC.decrypt(encrypted, skey, padding, ivec);
-    //var decrypted = asmCrypto.AES_CFB.decrypt(encrypted, skey, ivec);
-    //var decrypted = asmCrypto.AES_OFB.decrypt(encrypted, skey, ivec);
-    //var decrypted = asmCrypto.AES_CTR.decrypt(encrypted, skey, ivec);
+    var decrypted = aesDecrypt(cipher, encrypted, skey, padding, ivec);
     return asmCrypto.bytes_to_string(decrypted);
 }
 
 function encryptText() {
-    var el = document.getElementById('txtText');
-    var encrypted = encrypt(el.value);
-    el.value = encrypted;
+    var elText = document.getElementById('txtText');
+    var elCipher = document.getElementById('cboCipher');
+    var elStatus = document.getElementById('spnStatus');
+    try {
+        var encrypted = encrypt(elCipher.value, elText.value);
+        elText.value = encrypted;
+        elStatus.innerHTML = "[" + elCipher.value + "] Success encrypted.";
+    } catch (err) {
+        elStatus.innerHTML = "[" + elCipher.value + "] Fail encrypted.\n" + err;
+    }
 }
 
 function decryptText() {
-    var el = document.getElementById('txtText');
-    var decrypted = decrypt(el.value);
-    el.value = decrypted;
+    var elText = document.getElementById('txtText');
+    var elCipher = document.getElementById('cboCipher');
+    var elStatus = document.getElementById('spnStatus');
+    try {
+        var decrypted = decrypt(elCipher.value, elText.value);
+        elText.value = decrypted;
+        elStatus.innerHTML = "[" + elCipher.value + "] Success decrypted.";
+    } catch (err) {
+        elStatus.innerHTML = "[" + elCipher.value + "] Fail decrypted.\n" + err;
+    }
 }
 </script>
     </head>
     <body>
-        <div>Using <a href="https://github.com/vibornoff/asmcrypto.js">asmCrypto</a></div>
+        <div>Using <a href="https://github.com/vibornoff/asmcrypto.js" target="asmcrypto">asmCrypto</a></div>
         <h3>Only ASCII text, no wide character, no chinese.</h3>
+        <select id="cboCipher">
+            <option value="aes-ecb">AES ECB</option>
+            <option value="aes-cbc" selected="selected">AES CBC</option>
+            <option value="aes-cfb">AES CFB</option>
+            <option value="aes-ofb">AES OFB</option>
+            <option value="aes-ctr">AES CTR</option>
+        </select>
         <input type="button" onclick="encryptText();" value="Encrypt"/>
         <input type="button" onclick="decryptText();" value="Decrypt"/>
+        <span id="spnStatus"></span>
         <br/>
-        <textarea id="txtText" name="msg" cols="80" rows="25" maxlength="8000">supercalifragilisticexpialidocious
+        <textarea id="txtText" name="msg" cols="80" rows="25">supercalifragilisticexpialidocious
 dociousaliexpilisticfragicalisuper
 Lopado-temacho-selacho-galeo-kranio-leipsano-drim-hypo-trimmato-silphio-parao-melito-katakechy-meno-kichl-epi-kossypho-phatto-perister-alektryon-opte-kephallio-kigklo-peleio-lagoio-siraio-baphe-tragano-pterygon
 Pneumonoultramicroscopicsilicovolcanoconiosis
