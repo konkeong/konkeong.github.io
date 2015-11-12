@@ -7,22 +7,28 @@
 .hgignore
 .git
 .gradle
+.nb-gradle
 
 # Ignore all these directories
 private/
 generated/
 target/
+bin/
 .idea/
 .target/
 .sonartmp/
 logs/
+log/
+node_modules/
+bower_components/
+@*_LOG_DIR@
 *_IS_UNDEFINED/
-@*/
 
 # ignore all these files
 .#*
 .*#
 .*.sw*
+_.sw*
 *.orig
 *.orgn
 *.iml
@@ -35,17 +41,6 @@ nb-configuration.xml
 *.diff
 *.patch
 .merge_file*
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files
-*.jar
-*.war
-*.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
 
 #################
 ## Eclipse
@@ -123,6 +118,7 @@ build/
 *.vssscc
 .builds
 *.pidb
+*.log
 *.scc
 
 # Visual C++ cache files
@@ -187,7 +183,6 @@ csx
 AppPackages/
 
 # Others
-sql/
 *.Cache
 ClientBin/
 [Ss]tyle[Cc]op.*
