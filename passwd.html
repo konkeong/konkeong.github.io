@@ -23,13 +23,13 @@ function randomBytes(length) {
 }
 
 function aesEncrypt(cipher, data, skey, padding, ivec) {
-    if (cipher == 'aes-cbc') {
+    if (cipher == 'AES-CBC') {
         return asmCrypto.AES_CBC.encrypt(data, skey, padding, ivec);
-    } else if (cipher == 'aes-cfb') {
+    } else if (cipher == 'AES-CFB') {
         return asmCrypto.AES_CFB.encrypt(data, skey, ivec);
-    } else if (cipher == 'aes-ofb') {
+    } else if (cipher == 'AES-OFB') {
         return asmCrypto.AES_OFB.encrypt(data, skey, ivec);
-    } else if (cipher == 'aes-ctr') {
+    } else if (cipher == 'AES-CTR') {
         return asmCrypto.AES_CTR.encrypt(data, skey, ivec);
     } else {
         return asmCrypto.AES_ECB.encrypt(data, skey, padding);
@@ -37,13 +37,13 @@ function aesEncrypt(cipher, data, skey, padding, ivec) {
 }
 
 function aesDecrypt(cipher, encrypted, skey, padding, ivec) {
-    if (cipher == 'aes-cbc') {
+    if (cipher == 'AES-CBC') {
         return asmCrypto.AES_CBC.decrypt(encrypted, skey, padding, ivec);
-    } else if (cipher == 'aes-cfb') {
+    } else if (cipher == 'AES-CFB') {
         return asmCrypto.AES_CFB.decrypt(encrypted, skey, ivec);
-    } else if (cipher == 'aes-ofb') {
+    } else if (cipher == 'AES-OFB') {
         return asmCrypto.AES_OFB.decrypt(encrypted, skey, ivec);
-    } else if (cipher == 'aes-ctr') {
+    } else if (cipher == 'AES-CTR') {
         return asmCrypto.AES_CTR.decrypt(encrypted, skey, ivec);
     } else {
         return asmCrypto.AES_ECB.decrypt(encrypted, skey, padding);
@@ -105,11 +105,13 @@ function encryptText() {
     var elCipher = document.getElementById('cboCipher');
     var elStatus = document.getElementById('spnStatus');
     try {
-        var encrypted = encrypt(elCipher.value, elText.value);
-        elText.value = encrypted;
-        elStatus.innerHTML = "[" + elCipher.value + "] Success encrypted.";
+        var cipherVal = elCipher.value;
+        var textVal = elText.value;
+        var encrypted = encrypt(cipherVal, textVal);
+        elText.value = '(' + cipherVal + ')' + encrypted;
+        elStatus.innerHTML = "[" + cipherVal + "] Success encrypted.";
     } catch (err) {
-        elStatus.innerHTML = "[" + elCipher.value + "] Fail encrypted.\n" + err;
+        elStatus.innerHTML = "[" + cipherVal + "] Fail encrypted.\n" + err;
     }
 }
 
@@ -118,11 +120,26 @@ function decryptText() {
     var elCipher = document.getElementById('cboCipher');
     var elStatus = document.getElementById('spnStatus');
     try {
-        var decrypted = decrypt(elCipher.value, elText.value);
+        var cipherVal = elCipher.value;
+        var textVal = elText.value;
+        var pos1 = textVal.indexOf('(', 0);
+        var pos2 = textVal.indexOf(')', 0);
+        if (pos1 >= 0 && pos2 > pos1) {
+            var cipherDetected = textVal.substring(pos1 + 1, pos2);
+            if (cipherDetected == 'AES-ECB'
+                || cipherDetected == 'AES-CBC'
+                || cipherDetected == 'AES-CFB'
+                || cipherDetected == 'AES-OFB'
+                || cipherDetected == 'AES-CTR') {
+                cipherVal = cipherDetected;
+            }
+            textVal = textVal.substring(pos2 + 1);
+        }
+        var decrypted = decrypt(cipherVal, textVal);
         elText.value = decrypted;
-        elStatus.innerHTML = "[" + elCipher.value + "] Success decrypted.";
+        elStatus.innerHTML = "[" + cipherVal + "] Success decrypted.";
     } catch (err) {
-        elStatus.innerHTML = "[" + elCipher.value + "] Fail decrypted.\n" + err;
+        elStatus.innerHTML = "[" + cipherVal + "] Fail decrypted.\n" + err;
     }
 }
 </script>
@@ -131,11 +148,11 @@ function decryptText() {
         <div>Using <a href="https://github.com/vibornoff/asmcrypto.js" target="asmcrypto">asmCrypto</a></div>
         <h3>Only ASCII text, no wide character, no chinese.</h3>
         <select id="cboCipher">
-            <option value="aes-ecb">AES ECB</option>
-            <option value="aes-cbc" selected="selected">AES CBC</option>
-            <option value="aes-cfb">AES CFB</option>
-            <option value="aes-ofb">AES OFB</option>
-            <option value="aes-ctr">AES CTR</option>
+            <option value="AES-ECB">AES ECB</option>
+            <option value="AES-CBC" selected="selected">AES CBC</option>
+            <option value="AES-CFB">AES CFB</option>
+            <option value="AES-OFB">AES OFB</option>
+            <option value="AES-CTR">AES CTR</option>
         </select>
         <input type="button" onclick="encryptText();" value="Encrypt"/>
         <input type="button" onclick="decryptText();" value="Decrypt"/>
