@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Encrypt/Decrypt Password</title>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <script src="js/asmcrypto.js"></script>
+<head>
+    <title>Encrypt/Decrypt Password</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/asmcrypto.js"></script>
 <script>
 // asmCrypto.SHA512.base64(base64Combo);
-
 function randomBytes(length) {
     if (length <= 0) {
         throw 'length=[' + length + '] must >= 0';
@@ -109,9 +108,9 @@ function encryptText() {
         var textVal = elText.value;
         var encrypted = encrypt(cipherVal, textVal);
         elText.value = '(' + cipherVal + ')' + encrypted;
-        elStatus.innerHTML = "[" + cipherVal + "] Success encrypted.";
+        elStatus.innerHTML = '[' + cipherVal + '] Success encrypted.';
     } catch (err) {
-        elStatus.innerHTML = "[" + cipherVal + "] Fail encrypted.\n" + err;
+        elStatus.innerHTML = '[' + cipherVal + '] Fail encrypted.\n' + err;
     }
 }
 
@@ -137,28 +136,28 @@ function decryptText() {
         }
         var decrypted = decrypt(cipherVal, textVal);
         elText.value = decrypted;
-        elStatus.innerHTML = "[" + cipherVal + "] Success decrypted.";
+        elStatus.innerHTML = '[' + cipherVal + '] Success decrypted.';
     } catch (err) {
-        elStatus.innerHTML = "[" + cipherVal + "] Fail decrypted.\n" + err;
+        elStatus.innerHTML = '[' + cipherVal + '] Fail decrypted.\n' + err;
     }
 }
 </script>
-    </head>
-    <body>
-        <div>Using <a href="https://github.com/vibornoff/asmcrypto.js" target="asmcrypto">asmCrypto</a></div>
-        <h3>Only ASCII text, no wide character, no chinese.</h3>
-        <select id="cboCipher">
-            <option value="AES-ECB">AES ECB</option>
-            <option value="AES-CBC" selected="selected">AES CBC</option>
-            <option value="AES-CFB">AES CFB</option>
-            <option value="AES-OFB">AES OFB</option>
-            <option value="AES-CTR">AES CTR</option>
-        </select>
-        <input type="button" onclick="encryptText();" value="Encrypt"/>
-        <input type="button" onclick="decryptText();" value="Decrypt"/>
-        <span id="spnStatus"></span>
-        <br/>
-        <textarea id="txtText" name="msg" cols="80" rows="25">supercalifragilisticexpialidocious
+</head>
+<body>
+    <div>Using <a href="https://github.com/vibornoff/asmcrypto.js" target="asmcrypto">asmCrypto</a></div>
+    <h3>Only ASCII text, no wide character, no chinese.</h3>
+    <select id="cboCipher">
+        <option value="AES-ECB">AES ECB</option>
+        <option value="AES-CBC" selected="selected">AES CBC</option>
+        <option value="AES-CFB">AES CFB</option>
+        <option value="AES-OFB">AES OFB</option>
+        <option value="AES-CTR">AES CTR</option>
+    </select>
+    <input type="button" onclick="encryptText();" value="Encrypt" />
+    <input type="button" onclick="decryptText();" value="Decrypt" />
+    <span id="spnStatus"></span>
+    <br />
+    <textarea id="txtText" name="msg" cols="80" rows="25">supercalifragilisticexpialidocious
 dociousaliexpilisticfragicalisuper
 Lopado-temacho-selacho-galeo-kranio-leipsano-drim-hypo-trimmato-silphio-parao-melito-katakechy-meno-kichl-epi-kossypho-phatto-perister-alektryon-opte-kephallio-kigklo-peleio-lagoio-siraio-baphe-tragano-pterygon
 Pneumonoultramicroscopicsilicovolcanoconiosis
@@ -166,5 +165,5 @@ Pseudopseudohypoparathyroidism
 Floccinaucinihilipilification
 Antidisestablishmentarianism
 </textarea>
-    </body>
+</body>
 </html>

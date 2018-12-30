@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Luhn Algorithm</title>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<head>
+    <title>Luhn Algorithm</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>
 function luhnAlgo() {
     var elText = document.getElementById('txtText');
     var elStatus = document.getElementById('spnStatus');
     try {
         var arr = elText.value.split('');
+        var len = arr.length;
         var cnt = 0;
         var one = 0;
         var two = 0;
         var luhn = '';
-        for (var ix = 0; ix < arr.length; ix += 1) {
+        var dup = (len % 2 == 0) ? true : false;
+        for (var ix = 0; ix < len; ix += 1) {
             var nn = parseInt(arr[ix]);
             if (isNaN(nn) == true) {
                 throw 'pos=[' + ix + '] ch=[' + arr[ix] + '] is not a digit';
             }
-            if (ix % 2 == 0) {
+            if (dup) {
                 one += nn;
             } else {
                 nn = nn * 2;
@@ -29,20 +31,21 @@ function luhnAlgo() {
                 }
                 two += nn;
             }
+            dup = ! dup;
             cnt = one + two;
             luhn = (cnt * 9) % 10;
         }
         elStatus.innerHTML = elText.value + luhn;
     } catch (err) {
-        elStatus.innerHTML = "[" + elText.value + "] Fail generate check digit.\n" + err;
+        elStatus.innerHTML = '[' + elText.value + '] Fail generate check digit.\n' + err;
     }
 }
 </script>
-    </head>
-    <body>
-        <div><a href="https://en.wikipedia.org/wiki/Luhn_algorithm" target="wiki_luhn">Luhn Algorithm</a></div>
-        <input type="text" id="txtText" onkeyup="luhnAlgo();" value=""/>
-        <br/>
-        <span id="spnStatus"></span>
-    </body>
+</head>
+<body>
+    <div><a href="https://en.wikipedia.org/wiki/Luhn_algorithm" target="wiki_luhn">Luhn Algorithm</a></div>
+    <input type="text" id="txtText" onkeyup="luhnAlgo();" value="" />
+    <br />
+    <span id="spnStatus"></span>
+</body>
 </html>
